@@ -28,14 +28,11 @@ namespace ExpenseTracker.Repository
             await _expenseDbContext.SaveChangesAsync();
             return _mapper.Map<UserDto>(user);
         }
-
         public  async Task<List<UserDto>> GetAllUser()
         {
             var users = await _expenseDbContext.User.ToListAsync();
             return _mapper.Map<List<UserDto>>(users);
-            
         }
-
         public async Task<UserDto> GetUserById(int id)
         {
             throw new NotImplementedException();

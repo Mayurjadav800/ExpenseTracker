@@ -29,15 +29,18 @@ namespace ExpenseTracker.Repository
         }
         public async Task<bool> DeleteExpense(int id)
         {
-            var expense = await _expenseDbContext.Expense.Where(e=>e.Id == id).FirstOrDefaultAsync();
-            //var expens = await _expenseDbContext.Expense.FindAsync(id);
+            var expense =  await _expenseDbContext.Expense.FindAsync(id);
             if(expense != null)
             {
                 _expenseDbContext.Remove(expense);
                 await _expenseDbContext.SaveChangesAsync();
                 return true;
             }
-            return false;
+            else
+            {
+                throw new Exception("Incorrect expense Id passed.");
+            }
+            
         }
         public async Task<List<ExpensDto>> GetAllExpense(ExpensFilterDto expensFilterDto)
         {
@@ -57,7 +60,13 @@ namespace ExpenseTracker.Repository
                 DateTime startDate = GetStartDateForTimeRange(expensFilterDto.TimeRange.Value);
                 expenses = expenses.Where(e => e.CreatedAt >= startDate).ToList();
             }
-            return expenses;
+            if (expensFilterDto.ShortByOrderDescending)
+            {
+                expenses = expenses.OrderByDescending(e => e.ExpenseAmount).ToList();
+            }
+            expenses =expenses.Skip((expensFilterDto.PageNumber - 1)* expensFilterDto.PageSize)
+                .Take(expensFilterDto.PageSize).ToList();
+             return expenses;
         }
         private DateTime GetStartDateForTimeRange(TimeRange timeRange)
         {
@@ -79,7 +88,12 @@ namespace ExpenseTracker.Repository
         }
         public async Task<ExpensDto> GetExpenseById(int id)
         {
-            var expens = await _expenseDbContext.Expense.Where(e => e.Id == id).FirstOrDefaultAsync();
+            var expens =  await _expenseDbContext.Expense.FindAsync(id);
+            if(expens == null)
+            {
+                throw new ArgumentException("Expense Id is Not Found");
+            }
+            //var expens = _expenseDbContext.Expense.Where(e => e.Id == id).FirstOrDefault();
             var expensDto = _mapper.Map<ExpensDto>(expens);
             return _mapper.Map<ExpensDto>(expensDto);
         }

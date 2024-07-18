@@ -21,7 +21,6 @@ namespace ExpenseTracker.Repository
             _expenseDbContext = expenseDbContext;
             _configuration = configuration;
         }
-       
         public async Task<string> CreateAuthentication(LogginDto logginDto)
         {
             try
@@ -50,10 +49,7 @@ namespace ExpenseTracker.Repository
             {
                 throw;
             }
-
-
-        }
-           
         }
     }
+ }
 
