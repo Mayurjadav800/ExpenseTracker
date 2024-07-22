@@ -1,8 +1,11 @@
 ﻿using ExpenseTracker.Data;
 using ExpenseTracker.Dto;
+using ExpenseTracker.Model;
 using ExpenseTracker.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mail;
 
 namespace ExpenseTracker.Controllers
 {
@@ -66,5 +69,36 @@ namespace ExpenseTracker.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpPost("Forgotpassword")]
+        public async Task<ActionResult<string>> Forgot(ResetpasswordDto resetpasswordDto)
+        {
+            try
+            {
+                var result = await _userRepository.CreateForgotPassword(resetpasswordDto);
+                if (!result)
+                {
+                    return BadRequest("Invalid email address.");
+                }
+                return Ok("Password reset link has been sent to your email.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        [HttpPost("Resetpassword")]
+        public async Task<ActionResult<string>>Reset(ResetpasswordDto resetpasswordDto)
+        {
+            try
+            {
+                var Reset = await _userRepository.CreateForgotPassword(resetpasswordDto);
+                return Ok(Reset);
+
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
 }

@@ -1,6 +1,8 @@
 using ExpenseTracker.Data;
+using ExpenseTracker.Model;
 using ExpenseTracker.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -30,6 +32,9 @@ builder.Services.AddControllers(); builder.Services.AddAuthentication(JwtBearerD
         };
     });
 builder.Services.AddAuthorization();
+//reset token valid for 2 hours
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+               options.TokenLifespan = TimeSpan.FromHours(2));
 //builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -63,11 +68,14 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddEndpointsApiExplorer();
 var provider = builder.Services.BuildServiceProvider();
 var config = provider.GetService<IConfiguration>();
+builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSetting"));
 builder.Services.AddDbContext<ExpenseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("dbcs")));
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
 builder.Services.AddScoped<IExpensRepository, ExpensRepository>();
+
+builder.Services.AddTransient<IEmailRepository, EmailRepository>();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

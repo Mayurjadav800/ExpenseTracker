@@ -22,7 +22,12 @@ namespace ExpenseTracker.Repository
             {
                 throw new ArgumentException(nameof(expensDto));
             }
+            if (expensDto.ExpenseAmount >= 50000)
+            {
+                throw new ArgumentException("Amount Maximum limit is 50000");
+            }
             var expens = _mapper.Map<Expense>(expensDto);
+           
             await _expenseDbContext.Expense.AddAsync(expens);
             await _expenseDbContext.SaveChangesAsync();
             return _mapper.Map<ExpensDto>(expens);
@@ -40,7 +45,6 @@ namespace ExpenseTracker.Repository
             {
                 throw new Exception("Incorrect expense Id passed.");
             }
-            
         }
         public async Task<List<ExpensDto>> GetAllExpense(ExpensFilterDto expensFilterDto)
         {
@@ -64,7 +68,11 @@ namespace ExpenseTracker.Repository
             {
                 expenses = expenses.OrderByDescending(e => e.ExpenseAmount).ToList();
             }
-            expenses =expenses.Skip((expensFilterDto.PageNumber - 1)* expensFilterDto.PageSize)
+            else
+            {
+                expenses = expenses.OrderBy(e => e.ExpenseAmount).ToList();
+            }
+            expenses =expenses.Skip((expensFilterDto.PageNumber - 1) * expensFilterDto.PageSize)
                 .Take(expensFilterDto.PageSize).ToList();
              return expenses;
         }
@@ -93,7 +101,6 @@ namespace ExpenseTracker.Repository
             {
                 throw new ArgumentException("Expense Id is Not Found");
             }
-            //var expens = _expenseDbContext.Expense.Where(e => e.Id == id).FirstOrDefault();
             var expensDto = _mapper.Map<ExpensDto>(expens);
             return _mapper.Map<ExpensDto>(expensDto);
         }
